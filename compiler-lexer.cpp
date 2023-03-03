@@ -1,12 +1,26 @@
 #include <iostream>
 #include <string>
 #include <cctype>
+#include <sstream>
 #include <fstream>
+#include <vector>
 
 using namespace std;
+
+enum Token {
+    Operator,
+    Seperator,
+    Int,
+    Keyword,
+    ID,
+    Real,
+};
+
 void lexer(string input){
-  
-    string current_token = "";
+    string store;
+    bool flag = false;
+    bool opflag = true;
+string current_token = "";
     string current_type = "";
     cout << "Token    " << "Lexeme" << endl;
     for (size_t i = 0; i < input.length(); i++) {
@@ -24,6 +38,7 @@ void lexer(string input){
                 current_token == "else" || current_token == "fi" || current_token == "return" || current_token == "put" || current_token == "get" || current_token == "while"
                 || current_token == "endwhile" || current_token == "true" || current_token == "false") {
                 current_type = current_token;
+                
                 cout << "Keyword: " << current_token << endl;
             }
             else {
@@ -34,19 +49,38 @@ void lexer(string input){
         else if (isdigit(current_char) || current_char == '.') {
             current_token += current_char;
             while (isdigit(input[i + 1]) || input[i + 1] == '.') {
+                if (input[i + 1] == '.')
+                {
+                    flag = true;
+                }
                 current_token += input[++i];
+              
             }
-            if (current_token == "0" || "1" || "2" || "3" || "4" || "5" || "6" || "7" || "8" || "9") {
+            if ((current_token == "0" || "1" || "2" || "3" || "4" || "5" || "6" || "7" || "8" || "9")  && (flag == false)){
                 cout << "Integer: " << current_token << endl;
             }
-            else {
+            else if(flag = true){
                 cout << "Real: " << current_token << endl;
             }
             current_token = "";
         }
         else if (current_char == '=' || current_char == '!' || current_char == '>' || current_char == '<' || current_char == '*' ||
             current_char == '/' || current_char == '-' || current_char == '+') {
-            cout << "Operator: " << current_char << endl;
+            opflag = true;
+           
+            if ((current_char == '<' || current_char == '>') && (input[i + 1] == '=' )){
+
+                cout << "Operator: " << current_char << input[i + 1] << endl;
+                i++;
+                opflag = false;
+            }
+            else if ((current_char == '=') && (input[i + 1] == '>' || input[i + 1] == '<')) {
+                cout << "Operator: " << current_char << input[i + 1] << endl;
+                    i++;
+                    opflag = false;
+            }
+            if(opflag == true)
+            cout << "Operator: " << current_char  <<endl;
         }
         else if (current_char == '(' || current_char == ')' || current_char == '{' || current_char == '}') {
             cout << "Separator: " << current_char << endl;
@@ -57,7 +91,7 @@ void lexer(string input){
             }
         }
         else {
-            // Ignore other characters
+          cout << "Unknown: " << current_char << endl;
             continue;
         }
     }
@@ -66,22 +100,14 @@ void lexer(string input){
 }
 
 int main(int argc, char* argv[]) {
-    string input;
-    ifstream myfile(argv[1]);
-    if (!myfile.is_open()) {
-        cout << "Could not open file: " << argv[1] << endl;
-        return 1;
-    } 
-    while (!myfile.eof())
-    {
-        myfile >> input;
-    }  
-    cout << input;
-    //string input = "while  (fahr <= upper)  -int 5  a = 23.00; endwhile  [*this is sample *]";
-   // lexer(input);
+ 
+    string input = "main()int fahr, celsius int lower, upper, step; lower = 0; >> ==  >= <= => ##@@   34.34 /* lower limit of temperature scale */     lower = 123.00;      /* lower limit of temperature scale */";
+     
+
+   lexer(input);
 
     /* while not finished(i.e. not end of the source file) do
         call the lexer for a token
         print the tokenand lexeme
-        endwhile *\
+        endwhile */
 }
