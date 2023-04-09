@@ -1,0 +1,3 @@
+﻿  lexerpt2.cpp
+C:\Users\ALLAN CORTES\source\repos\lexerpt2\lexerpt2\lexerpt2.cpp(68,10): warning C4101: 'comment': unreferenced local variable
+  lexerpt2.vcxproj -> C:\Users\ALLAN CORTES\source\repos\lexerpt2\x64\Debug\lexerpt2.exe
