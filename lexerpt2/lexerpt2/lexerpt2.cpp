@@ -60,137 +60,13 @@ bool isSeparator(char current) {
     return false;
 }
 
-void lexer(string input, string name_of_output) {
-    string current_token = "";
-    string current_type = "";
-    int decimals = 0;
-    int commentChecker = 0;
-    bool comment;
-    ofstream outputFile;
-    vector <string> words;
 
-
-    outputFile.open(name_of_output + ".txt", ios::app);
-    for (size_t i = 0; i < input.length(); i++) {
-        char current_char = input[i];
-        char next_char = input[i + 1];
-
-        if (isComment(current_char, next_char) == true) {
-            while (input[i] != ']')
-            {
-                i++;
-                if (endOfComment(current_char, next_char) == true) {
-                    cout << "Done";
-                }
-            }
-            if (endOfComment(current_char, next_char) == true) {
-                commentChecker = 0;
-            }
-        }
-
-        if (commentChecker == 1) {
-            continue;
-        }
-        else if (isspace(current_char)) {
-            continue;
-        }
-        else if (isalpha(current_char)) {
-            current_token += current_char;
-            while (isalnum(input[i + 1])) {
-                current_token += input[++i];
-            }
-            if (isKeyword(current_token) == true) {
-                current_type = current_token;
-                outputFile << "Keyword         " << current_token << endl;
-                words.push_back(current_token);
-
-            }
-            else {
-                outputFile << "Identifier      " << current_token << endl;
-                words.push_back(current_token);
-
-            }
-            current_token = "";
-        }
-        else if (isdigit(current_char) || current_char == '.') {
-
-            current_token += current_char;
-            if (current_char == '.') {
-                decimals++;
-            }
-            while (isdigit(input[i + 1]) || input[i + 1] == '.') {
-                current_token += input[++i];
-                if (input[i + 1] == '.') {
-                    decimals++;
-                }
-            }
-            if (decimals == 1) {
-                outputFile << "Real            " << current_token << endl;
-                words.push_back(current_token);
-
-                decimals = 0;
-            }
-            else if (isSingleDigit(current_token) == true) {
-                outputFile << "Integer         " << current_token << endl;
-                words.push_back(current_token);
-
-            }
-            current_token = "";
-        }
-        else if (isOperator(current_char) == true) {
-            if (isLogicalOperator(current_char, next_char) == true) {
-                current_token += current_char;
-                current_token += next_char;
-                outputFile << "Operator        " << current_token << endl;
-                words.push_back(current_token);
-
-                i++;
-            }
-            else {
-                current_token = current_char;
-                outputFile << "Operator        " << current_token << endl;
-                words.push_back(current_token);
-
-            }
-            current_token = "";
-        }
-        else if (isSeparator(current_char) == true) {
-            current_token = current_char;
-            outputFile << "Separator       " << current_token << endl;
-            words.push_back(current_token);
-
-
-            
-        }
-        else if (current_char == '[') {
-            while ((input[i] != ']') && i < input.length() - 1) {
-                i++;
-            }
-        }
-        else {
-            current_token = current_char;
-            outputFile << "Unknown:         " << current_token << endl;
-            words.push_back(current_token);
-            current_token = "";
-
-            continue;
-        }
-        current_token = "";
-    }
-
-    outputFile.close();
-    for (int i = 0; i < words.size(); i++) {
-        cout << words[i] << endl;
-    }
-}
 /*
-void SA(string token) {
-    //1
-    void Rat23s(){
+    void Rat23s() {
         opt_FunctionDefinitions();
         opt_Declaration_List();
         Statement_List();
-    
+
     }
     //2
     void opt_FunctionDefinitions() {
@@ -198,24 +74,34 @@ void SA(string token) {
     }
     //3
     void Function_Definition() {
-        cout << " <Function Definition> -> <Function> <Function Definition Prime> \n <Function Definition Prime> ->  ,<Function Definition> | Epsilon";
+        //cout << " <Function Definition> -> <Function> <Function Definition Prime> \n <Function Definition Prime> ->  ,<Function Definition> | Epsilon";
+        Function();
 
     }
     //4
     void Function() {
         if (token == "function")
         {
-            cout << "<Identifier> ( <Opt Parameter List> ) <Opt Declaration List> <Body>";
+            cout << "<Identifier>";
+        }
+        if (token == "(")
+        {
+            opt_Parameter_List();
+        }
+        else {
+            opt_Declaration_List();
+            Body();
         }
 
     }
     //5
     void opt_Parameter_List() {
-        cout << "<Parameter List> | <Empty>";
+        Parameter_list();
     }
     //6
     void Parameter_list() {
-        cout << "<Parameter list> -> <Parameter> <Parameter list Prime> \n <Parameter list Prime> ->  ,<Parameter list> | Epsilon";
+        // cout << "<Parameter list> -> <Parameter> <Parameter list Prime> \n <Parameter list Prime> ->  ,<Parameter list> | Epsilon";
+        Parameter();
 
     }
     //7
@@ -225,13 +111,15 @@ void SA(string token) {
     }
     //8
     void Qualifier() {
-        int;
-        bool;
-        //real;
+        if (token == "int") {}
+        if (token == "bool") {}
+        if (token == "real") {}
     }
     //9 
     void Body() {
-        Statement_List();
+        if (token == "{") {
+            Statement_List();
+        }
     }
     //10
     void opt_Declaration_List() {
@@ -240,17 +128,17 @@ void SA(string token) {
     }
     //11
     void Declaration_List() {
-        cout << " <Declaration List> -> <Declaration> <Declaration List Prime> \n <Declaration List Prime> -> ; <<Declaration List> | Epsilon";
-
-    }
-    void DeclarationListPrime() {
-        if (token == ";")
-        {
-            lexer();/// todo
-            Declaration_List();
-            DeclarationListPrime();
+        // cout << " <Declaration List> -> <Declaration> <Declaration List Prime> \n <Declaration List Prime> -> ; <<Declaration List> | Epsilon";
+        Declaration();
+        void DeclarationListPrime() {
+            if (token == ";")
+            {
+                Declaration_List();
+                DeclarationListPrime();
+            }
         }
     }
+
     //r12
     void Declaration() {
         Qualifier();
@@ -260,10 +148,12 @@ void SA(string token) {
     void IDs() {
         cout << " <IDs> -> <Identifier> <IDs Prime> \n <IDsPrime> -> , <IDS> | Epsilon";
 
+
     }
     //r14
     void Statement_List() {
-        cout << " <Statement List> -> <Statement> <Statement List Prime> \n <Statement List Prime> -> , <Statement List> | Epsilon";
+        // cout << " <Statement List> -> <Statement> <Statement List Prime> \n <Statement List Prime> -> , <Statement List> | Epsilon";
+        Statement();
 
     }
     //r15
@@ -287,7 +177,9 @@ void SA(string token) {
     }
     //r16
     void Compound() {
-        Statement_List();
+        if (token == "{") {
+            Statement_List();
+        }
     }
     //r17
     void Assign() {
@@ -303,7 +195,7 @@ void SA(string token) {
             cout << "error: 'if' expected";
         }
         if (token == "(") {
-            lexer()
+            lexer();
         }
         else
         {
@@ -314,6 +206,13 @@ void SA(string token) {
     //r19
     void Return() {
         cout << "return ';' | return <Expression>;";
+        if (token == ";") {
+            cout << "return ';'";
+        }
+        else {
+            cout << " return <Expression>;";
+        }
+
 
     }
     //r20
@@ -353,12 +252,63 @@ void SA(string token) {
         }
 
     }
+
+    void T() {
+        if (token == "identifier")
+        {
+            lexer();
+        }
+        else
+            cout << "Identifier expected";
+    }
+
+    void EPrime() {
+        if (token == "+" || token == "-")
+        {
+            lexer();
+            T();
+            EPrime();
+        }
+
+    }
     //r25
     void Expression() {
 
+
+        T();
+        EPrime();
+        if (!eof)
+        {
+            cout << "error";
+        }
     }
+    void F() {
+        if (token == "identifier")
+        {
+            lexer();
+        }
+        else
+            cout << "Identifier expected";
+    }
+
+    void TPrime() {
+        if (token == "*" || == "/")
+        {
+            lexer();
+            F();
+            TPrime();
+        }
+
+    }
+
     //r26
     void Term() {
+        F();
+        TPrime();
+        if (!eof)
+        {
+            cout << "error";
+        }
     }
     //r27
     void Factor() {
@@ -377,13 +327,139 @@ void SA(string token) {
     {
         cout << "epsilon";
     }
-}
-*/
+    */
+    vector<string> lexer(string input, string name_of_output) {
+        string current_token = "";
+        string current_type = "";
+        int decimals = 0;
+        int commentChecker = 0;
+        bool comment;
+        ofstream outputFile;
+        vector <string> words;
+
+
+        outputFile.open(name_of_output + ".txt", ios::app);
+        for (size_t i = 0; i < input.length(); i++) {
+            char current_char = input[i];
+            char next_char = input[i + 1];
+
+            if (isComment(current_char, next_char) == true) {
+                while (input[i] != ']')
+                {
+                    i++;
+                    if (endOfComment(current_char, next_char) == true) {
+                        cout << "Done";
+                    }
+                }
+                if (endOfComment(current_char, next_char) == true) {
+                    commentChecker = 0;
+                }
+            }
+
+            if (commentChecker == 1) {
+                continue;
+            }
+            else if (isspace(current_char)) {
+                continue;
+            }
+            else if (isalpha(current_char)) {
+                current_token += current_char;
+                while (isalnum(input[i + 1])) {
+                    current_token += input[++i];
+                }
+                if (isKeyword(current_token) == true) {
+                    current_type = current_token;
+                    outputFile << "Keyword         " << current_token << endl;
+                    words.push_back(current_token);
+
+                }
+                else {
+                    outputFile << "Identifier      " << current_token << endl;
+                    words.push_back(current_token);
+
+                }
+                current_token = "";
+            }
+            else if (isdigit(current_char) || current_char == '.') {
+
+                current_token += current_char;
+                if (current_char == '.') {
+                    decimals++;
+                }
+                while (isdigit(input[i + 1]) || input[i + 1] == '.') {
+                    current_token += input[++i];
+                    if (input[i + 1] == '.') {
+                        decimals++;
+                    }
+                }
+                if (decimals == 1) {
+                    outputFile << "Real            " << current_token << endl;
+                    words.push_back(current_token);
+
+                    decimals = 0;
+                }
+                else if (isSingleDigit(current_token) == true) {
+                    outputFile << "Integer         " << current_token << endl;
+                    words.push_back(current_token);
+
+                }
+                current_token = "";
+            }
+            else if (isOperator(current_char) == true) {
+                if (isLogicalOperator(current_char, next_char) == true) {
+                    current_token += current_char;
+                    current_token += next_char;
+                    outputFile << "Operator        " << current_token << endl;
+                    words.push_back(current_token);
+
+                    i++;
+                }
+                else {
+                    current_token = current_char;
+                    outputFile << "Operator        " << current_token << endl;
+                    words.push_back(current_token);
+
+                }
+                current_token = "";
+            }
+            else if (isSeparator(current_char) == true) {
+                current_token = current_char;
+                outputFile << "Separator       " << current_token << endl;
+                words.push_back(current_token);
+
+
+
+            }
+            else if (current_char == '[') {
+                while ((input[i] != ']') && i < input.length() - 1) {
+                    i++;
+                }
+            }
+            else {
+                current_token = current_char;
+                outputFile << "Unknown:         " << current_token << endl;
+                words.push_back(current_token);
+                current_token = "";
+
+                continue;
+            }
+            current_token = "";
+        }
+        outputFile.close();
+        for (int i = 0; i < words.size(); i++)
+        {
+            cout << words[i] << endl;
+        }
+        return words;
+    }
+
+
 int main(int argc, char* argv[]) {
 
     string input, name_of_output, complete_input, name_of_input;
     ifstream myfile;
     ofstream outputFile;
+    vector <string> test;
     cout << "Which file do you want to access: ";
     cin >> name_of_input;
 
@@ -402,12 +478,22 @@ int main(int argc, char* argv[]) {
         outputFile << "______________________" << endl << endl;
         outputFile.close();
         while (getline(myfile, input)) {
-            lexer(input, name_of_output);
+           test=lexer(input, name_of_output);
         }
     }
-
+   
+    while (!empty(test)) {
+        int counter = 0;
+        cout << test[counter];
+        counter++;
+        test.pop_back();
+    }
+    
+   
     myfile.close();
+   
     cout << name_of_output + ".txt" << " created";
+   
     return 0;
 }
 
