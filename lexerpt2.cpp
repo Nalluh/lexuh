@@ -29,7 +29,7 @@ bool isSingleDigit(string current) {
 }
 
 bool isKeyword(string st) {
-    if (st == "int" || st == "function" || st == "int" || st == "bool" || st == "real" || st == "if" ||
+    if (st == "int" || st == "function" || st == "bool" || st == "real" || st == "if" ||
         st == "else" || st == "fi" || st == "return" || st == "put" || st == "get" || st == "while"
         || st == "endwhile" || st == "true" || st == "false") {
         return true;
@@ -46,9 +46,13 @@ bool isOperator(char current) {
 }
 
 bool isLogicalOperator(char current, char next) {
-    if ((current == '<' || current == '>' || current == '=') && (next == '=')) {
+    if ((current == '<' || current == '>' || current == '!') && (next == '=')) {
         return true;
     }
+    if ((current == '=' ) &&( next == '>' || next == '<' || next == '=')) {
+        return true;
+    }
+
     return false;
 }
 
@@ -319,7 +323,7 @@ void lexer(string input, string name_of_output) {
     string current_type = "";
     int decimals = 0;
     int commentChecker = 0;
-    bool comment;
+    bool comment, flag = false;
     ofstream outputFile;
 
 
@@ -358,32 +362,70 @@ void lexer(string input, string name_of_output) {
                 {
                     if (input[i + 1] != '(') {
                         outputFile << "Keyword         " << current_token << endl;
-                        outputFile << input[i+1] << " Not Valid Error () expected" << endl;
+                        outputFile <<  "Error () expected" << endl;
                         exit(0);
                     }
-                    if (input[i + 1] == '(') {
-                        outputFile << "Keyword         " << current_token << endl;
-                        outputFile << " < Statement List > -> <Statement> <Statement List Prime> \n <Statement List Prime> ->, <Statement List> \n <if>" << endl;
+                    if (input[i + 1] == '(' ) {
+                        if (current_token == "if") {
+                            outputFile << "Keyword         " << current_token << endl;
+                            outputFile << " < Statement List > -> <Statement> <Statement List Prime> \n <Statement List Prime> ->, <Statement List> \n <" << current_token << "> \n <If> -> <Condition> <Statement>" << endl;
+
+                        }
+                        if (current_token == "while") {
+                            outputFile << " < Statement List > -> <Statement> <Statement List Prime> \n <Statement List Prime> ->, <Statement List> \n <" << current_token << "> \n <While> -> <Condition> <Statement>" << endl;
+
+                        }
+                        if (current_token == "put") {
+                            outputFile << " < Statement List > -> <Statement> <Statement List Prime> \n <Statement List Prime> ->, <Statement List> \n <" << current_token << "> \n <Print> -> <Expression>" << endl;
+
+                        }
+                        if (current_token == "get") {
+                            outputFile << " < Statement List > -> <Statement> <Statement List Prime> \n <Statement List Prime> ->, <Statement List> \n <" << current_token << "> \n <Scan> -> <IDS>" << endl;
+
+                        }
+                       
+                       
                         i++;
                             
                     }
                     
                 }
-                outputFile << "Keyword         " << current_token << endl;
+                else if (current_token == "int" || current_token == "bool" || current_token == "real") {
+                    outputFile << "Keyword         " << current_token << endl;
+                    outputFile << "< Parameter list > -> <Parameter> <Parameter list Prime> \n <Parameter list Prime> ->, <Parameter list> \n <Parameter> -> <Qualifier>" << endl;
 
+                }
+                else if (current_token == "function") {
+                    outputFile << " < Identifier > ->  <Opt Parameter List> \n <Opt Declaration List> <Body> ->  <Body> \n";
+
+                }
+                else {
+                    outputFile << "Keyword         " << current_token << endl;
+                    outputFile << " < Statement List > -> <Statement> <Statement List Prime> \n <Statement List Prime> ->, <Statement List> \n " << endl;
+                }
             }
             else {
+                if (i > 1)
+                {
+                    if (isOperator(input[i - 1])) {
+                        outputFile << "Identifier      " << current_token << endl;
+                        outputFile << "<Term> -> <Factor> <Term Prime>" << endl;
+                        flag = true;
+                    }
+
+                }
                 if (isOperator(input[i+1])) {
                     outputFile << "Identifier      " << current_token << endl;
                     outputFile << "<Term Prime>->e \n <Expression Prime> -> + <Term> <Expression Prime>" << endl;
                         
                 }
-                else {
+                else if(!flag){
                     outputFile << "Identifier      " << current_token << endl;
                     outputFile << "<Statement> -> <Assign> \n < Assign > -> <Identifier> = <Expression>;" << endl;
                 }
 
             }
+            flag = false;
             current_token = "";
         }
         else if (isdigit(current_char) || current_char == '.') {
@@ -400,11 +442,15 @@ void lexer(string input, string name_of_output) {
             }
             if (decimals == 1) {
                 outputFile << "Real            " << current_token << endl;
+                outputFile << "<Term> -> <Factor> <Term Prime> \n <Factor> -> <Primary> \n <Real>" << endl;
+
 
                 decimals = 0;
             }
             else if (isSingleDigit(current_token) == true) {
                 outputFile << "Integer         " << current_token << endl;
+                outputFile << "<Term> -> <Factor> <Term Prime> \n <Factor> -> <Primary> \n <Integer>" << endl;
+
 
             }
             current_token = "";
@@ -414,20 +460,27 @@ void lexer(string input, string name_of_output) {
                 current_token += current_char;
                 current_token += next_char;
                 outputFile << "Operator        " << current_token << endl;
+                outputFile << "<Condition> -> <Relop> " << endl;
+
 
                 i++;
             }
             else {
                 current_token = current_char;
                 outputFile << "Operator        " << current_token << endl;
+                outputFile << "<Term> -> <Factor> <Term_Prime> \n <Term_Prime> -> *<Factor> <Term_Prime> | / <Factor> <Term_Prime> \n";
 
             }
             current_token = "";
         }
         else if (isSeparator(current_char) == true) {
             current_token = current_char;
-            outputFile << "Separator       " << current_token << endl;
+            if (current_token == "#")
+            {
+                outputFile << "Separator       " << current_token << endl;
+                outputFile << "<Rat23S> ::= <Opt Function Definitions> # <Opt Declaration List> # <Statement List>" << endl;
 
+            }//TODO
 
 
         }
@@ -439,6 +492,8 @@ void lexer(string input, string name_of_output) {
         else {
             current_token = current_char;
             outputFile << "Unknown:         " << current_token << endl;
+            outputFile << "<Empty>" << endl;
+
             current_token = "";
 
             continue;
