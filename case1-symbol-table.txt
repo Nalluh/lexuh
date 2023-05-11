@@ -1,0 +1,12 @@
+#include <iostream>
+
+int main() {
+   int a;
+	int c;
+	bool b;
+	bool d;
+	bool e;
+int c;
+int sainfpasn;
+while()
+}
